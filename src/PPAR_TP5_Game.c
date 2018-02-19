@@ -13,8 +13,10 @@
 #include <time.h>
 //#include <mpi.h>
 
-static int N = 32;
-static int M = (N*2)/sizeof(unsigned int);
+#define WORLD_SIZE 32
+
+static int N = WORLD_SIZE;
+static int M = (WORLD_SIZE*2)/sizeof(unsigned int);
 static int itMax = 20;
 typedef struct coord
 {
@@ -232,16 +234,23 @@ void cls()
 // diplaying the world
 void print(unsigned int *world)
 {
-	int i;
+	int i, j, n;
 	cls();
 	for (i = 0; i < N; i++)
 		fprintf(stdout,"-");
-	for (i = 0; i < N*N; i++)
+	for (i = 0; i < N; i++)
 	{
-		if (i%N == 0)  fprintf(stdout,"\n");
-		if (world[i] == 0)  fprintf(stdout," ");
-		if (world[i] == 1)  fprintf(stdout,"o");
-		if (world[i] == 2)  fprintf(stdout,"x");
+		for (j = 0; j < N; j++)
+		{
+			n = read_cell(i, j, 0, 0, world);
+			if (n == 0)
+				fprintf(stdout," ");
+			if (n == 1)
+				fprintf(stdout,"o");
+			if (n == 2)
+				fprintf(stdout,"x");
+		}
+		fprintf(stdout,"\n");
 	}
 	fprintf(stdout,"\n");
 
@@ -260,8 +269,8 @@ int main(int argc,char *argv[])
 
 	// getting started  
 	//world1 = initialize_dummy();
-	world1 = initialize_random();
-	//world1 = initialize_glider();
+	//world1 = initialize_random();
+	world1 = initialize_glider();
 	//world1 = initialize_small_exploder();
 	world2 = allocate();
 	print(world1);
