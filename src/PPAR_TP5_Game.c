@@ -15,6 +15,11 @@
 
 static int N = 32;
 static int itMax = 20;
+typedef struct coord
+{
+	int k;
+	int l;
+} coord;
 
 // allocation only
 unsigned int* allocate()
