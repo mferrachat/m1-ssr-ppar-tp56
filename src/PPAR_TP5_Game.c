@@ -14,6 +14,7 @@
 //#include <mpi.h>
 
 static int N = 32;
+static int M = (N*2)/sizeof(unsigned int);
 static int itMax = 20;
 typedef struct coord
 {
@@ -24,18 +25,19 @@ typedef struct coord
 // allocation only
 unsigned int* allocate()
 {
-	return (unsigned int*)calloc(N*N,sizeof(unsigned int));
+	return (unsigned int*)calloc(N*M,sizeof(unsigned int));
 }
 
 // conversion cell location : 2d --> 1d
 // (row by row)
-int code(int x, int y, int dx, int dy)
+coord code(int x, int y, int dx, int dy)
 {
 	int i = (x + dx)%N;
 	int j = (y + dy)%N;
 	if (i < 0)  i = N + i;
 	if (j < 0)  j = N + j;
-	return i*N + j;
+	coord c = {i*M + (j >> (sizeof(unsigned int)/4)), j%(sizeof(unsigned int)/2)};
+	return c;
 }
 
 // writing into a cell location 
