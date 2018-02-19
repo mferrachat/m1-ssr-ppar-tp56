@@ -43,9 +43,10 @@ coord code(int x, int y, int dx, int dy)
 // writing into a cell location 
 void write_cell(int x,int y,unsigned int value,unsigned int *world)
 {
-	int k;
-	k = code(x,y,0,0);
-	world[k] = value;
+	coord c;
+	c = code(x,y,0,0);
+	world[c.k] &= (0x00 << (c.l*2));
+	world[c.k] |= (value << (c.l*2));
 }
 
 // random generation
@@ -133,8 +134,8 @@ unsigned int* initialize_small_exploder()
 // reading a cell
 int read_cell(int x,int y,int dx,int dy,unsigned int *world)
 {
-	int k = code(x,y,dx,dy);
-	return world[k];
+	coord c = code(x,y,dx,dy);
+	return (world[c.k] >> (c.l*2));
 }
 
 // updating counters
