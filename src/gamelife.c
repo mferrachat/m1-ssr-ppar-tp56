@@ -299,23 +299,29 @@ int main(int argc,char *argv[])
 	it = 0; change = 1;	
 	while (change && it < itMax)
 	{
+		printf("Process %d, iteration %d - start\n", rank, it);
 		change = newgeneration(world1,world2,f_r,l_r);
 		worldaux = world1; world1 = world2; world2 = worldaux;
 		//print(world1);
 		
 		MPI_Barrier(MPI_COMM_WORLD);
-
+		
+		printf("Process %d, iteration %d - work done, communicating\n", rank, it);
+		
 		MPI_Isend(world1+(l_r*M), M, MPI_UNSIGNED, (rank+1)%size, 0, MPI_COMM_WORLD, &request);
 		MPI_Isend(world1+(f_r*M), M, MPI_UNSIGNED, (rank-1)%size, 0, MPI_COMM_WORLD, &request);
+		printf("Process %d, iteration %d - data sent, waiting to receive\n", rank, it);
 		MPI_Recv(world1+(((l_r+1)%N)*M), M, MPI_UNSIGNED, (rank+1)%size, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		printf("Process %d, iteration %d - first dataset received\n", rank, it);
 		MPI_Recv(world1+(((f_r-1)%N)*M), M, MPI_UNSIGNED, (rank-1)%size, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-		
+		printf("Process %d, iteration %d - second dataset received\n", rank, it);
+		printf("Process %d, iteration %d - data received\n", rank, it);
 		MPI_Barrier(MPI_COMM_WORLD);
-		
+		printf("Process %d, iteration %d - end of cycle\n", rank, it);
 		it++;
 	}
 	
-	MPI_Gather(world1, (N/size)*M, MPI_UNSIGNED, world1, N*M, MPI_UNSIGNED, MPI_COMM_WORLD);
+	MPI_Gather(world1, (N/size)*M, MPI_UNSIGNED, world1, N*M, MPI_UNSIGNED, 0, MPI_COMM_WORLD);
 	print(world1);
 
 	// ending
