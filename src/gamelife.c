@@ -284,15 +284,12 @@ int main(int argc,char *argv[])
 		//world1 = initialize_random();
 		world1 = initialize_glider();
 		//world1 = initialize_small_exploder();
-		for(i = 1; i < size; i++)
-			MPI_Isend(world1, N*M, MPI_UNSIGNED, i, 0, MPI_COMM_WORLD, &request);
 		print(world1);
 	}
 	else
-	{
 		world1 = allocate();
-		MPI_Recv(world1, N*M, MPI_UNSIGNED, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-	}
+	
+	MPI_Bcast(world1, N*M, MPI_UNSIGNED, 0, MPI_COMM_WORLD);
 
 	world2 = allocate();
 	
