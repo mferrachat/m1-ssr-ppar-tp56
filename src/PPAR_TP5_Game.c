@@ -48,7 +48,7 @@ void write_cell(int x,int y,unsigned int value,unsigned int *world)
 {
 	coord c;
 	c = code(x,y,0,0);
-	world[c.k] &= (0x00 << (c.l*2));
+	world[c.k] &= ~(0b11 << (c.l*2));
 	world[c.k] |= (value << (c.l*2));
 }
 
@@ -138,7 +138,7 @@ unsigned int* initialize_small_exploder()
 int read_cell(int x,int y,int dx,int dy,unsigned int *world)
 {
 	coord c = code(x,y,dx,dy);
-	return (world[c.k] >> (c.l*2));
+	return ((world[c.k] >> (c.l*2)) & 0b11);
 }
 
 // updating counters
@@ -294,7 +294,7 @@ int main(int argc,char *argv[])
 		world1 = allocate();
 		MPI_Recv(world1, N*M, MPI_UNSIGNED, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 	}
-	
+
 	world2 = allocate();
 	
 	f_r = (N/size)*rank;
