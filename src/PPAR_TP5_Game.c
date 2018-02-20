@@ -7,11 +7,12 @@
  *
  */
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <time.h>
-//#include <mpi.h>
+#include <mpi.h>
 
 #define WORLD_SIZE 32
 
@@ -100,9 +101,9 @@ unsigned int* initialize_glider()
 			write_cell(x,y,0,world);
 
 	mx = N/2 - 1; my = N/2 - 1;
-	x = mx; y = my + 1;  write_cell(x,y,1,world);
-	x = mx + 1; y = my + 2;  write_cell(x,y,1,world);
-	x = mx + 2; y = my; write_cell(x,y,1,world);
+	x = mx;		y = my + 1; write_cell(x,y,1,world);
+	x = mx + 1; y = my + 2; write_cell(x,y,1,world);
+	x = mx + 2; y = my;		write_cell(x,y,1,world);
 				y = my + 1; write_cell(x,y,1,world);
 				y = my + 2; write_cell(x,y,1,world);
 
@@ -263,19 +264,38 @@ void print(unsigned int *world)
 // main
 int main(int argc,char *argv[])
 {
+	int i = 0;
 	int it,change;
+	int rank = 0, size = 0;
 	unsigned int *world1,*world2;
 	unsigned int *worldaux;
+	
+	MPI_Init(&argc, &argv);
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	MPI_Comm_size(MPI_COMM_WORLD, &size);
+	
+	assert((N%size) == 0);
 
-	// getting started  
-	//world1 = initialize_dummy();
-	//world1 = initialize_random();
-	world1 = initialize_glider();
-	//world1 = initialize_small_exploder();
+	if(rank == 0)
+	{
+		// getting started  
+		//world1 = initialize_dummy();
+		//world1 = initialize_random();
+		world1 = initialize_glider();
+		//world1 = initialize_small_exploder();
+		for(i = 1; i < size; i++)
+			MPI_Send(world1, N*M);
+		print(world1);
+	}
+	else
+	{
+		world1 = allocate();
+		MPI_Recv(world1, N*M, MPI_UNSIGNED, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+	}
+	
 	world2 = allocate();
-	print(world1);
 
-	it = 0;  change = 1; 
+	it = 0; change = 1;	
 	while (change && it < itMax)
 	{
 		change = newgeneration(world1,world2,0,N);
@@ -283,6 +303,8 @@ int main(int argc,char *argv[])
 		print(world1);
 		it++;
 	}
+	
+	MPI_Finalize();
 
 	// ending
 	free(world1); free(world2);
