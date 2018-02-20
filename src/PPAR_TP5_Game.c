@@ -191,7 +191,7 @@ short newgeneration(unsigned int *world1,unsigned int *world2,int xstart,int xen
 			if(cell != 0)
 			{
 				// Right number of neighbors, the cell lives on
-				if((nn > 2) && (nn < 4))
+				if((nn > 1) && (nn < 4))
 					write_cell(x, y, cell, world2);
 				// Else the cell dies, by over- or under-population (the cell is already set to 0)
 				else
@@ -201,7 +201,7 @@ short newgeneration(unsigned int *world1,unsigned int *world2,int xstart,int xen
 			else if(nn == 3)
 			{
 				// Takes on the dominant genus
-				if(n1 == 2)
+				if(n1 >= 2)
 					write_cell(x, y, 1, world2);
 				else
 					write_cell(x, y, 2, world2);
@@ -252,8 +252,8 @@ int main(int argc,char *argv[])
 
 	// getting started  
 	//world1 = initialize_dummy();
-	world1 = initialize_random();
-	//world1 = initialize_glider();
+	//world1 = initialize_random();
+	world1 = initialize_glider();
 	//world1 = initialize_small_exploder();
 	world2 = allocate();
 	print(world1);
