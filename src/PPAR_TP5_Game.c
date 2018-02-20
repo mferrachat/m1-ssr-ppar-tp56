@@ -264,7 +264,7 @@ void print(unsigned int *world)
 // main
 int main(int argc,char *argv[])
 {
-	int i = 0;
+	int i = 0, f_r, l_r;
 	int it,change;
 	int rank = 0, size = 0;
 	unsigned int *world1,*world2;
@@ -273,6 +273,8 @@ int main(int argc,char *argv[])
 	MPI_Init(&argc, &argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
+	
+	MPI_Request request;
 	
 	assert((N%size) == 0);
 
@@ -284,7 +286,7 @@ int main(int argc,char *argv[])
 		world1 = initialize_glider();
 		//world1 = initialize_small_exploder();
 		for(i = 1; i < size; i++)
-			MPI_Send(world1, N*M);
+			MPI_Isend(world1, N*M, MPI_UNSIGNED, i, 0, MPI_COMM_WORLD, &request);
 		print(world1);
 	}
 	else
@@ -294,20 +296,43 @@ int main(int argc,char *argv[])
 	}
 	
 	world2 = allocate();
+	
+	f_r = (N/size)*rank;
+	l_r = (N/size)*(rank+1);
 
 	it = 0; change = 1;	
 	while (change && it < itMax)
 	{
-		change = newgeneration(world1,world2,0,N);
+		change = newgeneration(world1,world2,f_r,l_r);
 		worldaux = world1; world1 = world2; world2 = worldaux;
-		print(world1);
+		//print(world1);
+		
+		MPI_Barrier(MPI_COMM_WORLD);
+
+		MPI_Isend(world1+(l_r*M), M, MPI_UNSIGNED, (rank+1)%size, 0, MPI_COMM_WORLD, &request);
+		MPI_Isend(world1+(f_r*M), M, MPI_UNSIGNED, (rank-1)%size, 0, MPI_COMM_WORLD, &request);
+		MPI_Recv(world1+(((l_r+1)%N)*M), M, MPI_UNSIGNED, (rank+1)%size, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		MPI_Recv(world1+(((f_r-1)%N)*M), M, MPI_UNSIGNED, (rank-1)%size, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		
+		MPI_Barrier(MPI_COMM_WORLD);
+		
 		it++;
 	}
 	
-	MPI_Finalize();
+	if(rank == 0)
+	{
+		for(i = 1; i < size; i++)
+			MPI_Recv(world1+((N/size)*i*M), (N/size)*M, MPI_UNSIGNED, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		print(world1);
+	}
+	else
+		MPI_Isend(world1+(l_r*M), (N/size)*M, MPI_UNSIGNED, 0, 0, MPI_COMM_WORLD, &request);
 
 	// ending
 	free(world1); free(world2);
+	
+	MPI_Finalize();
+	
 	return 0;
 }
 
