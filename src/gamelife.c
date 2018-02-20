@@ -133,7 +133,6 @@ unsigned int* initialize_small_exploder()
 	return world;
 }
 
-
 // reading a cell
 int read_cell(int x,int y,int dx,int dy,unsigned int *world)
 {
