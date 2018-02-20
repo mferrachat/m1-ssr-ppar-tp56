@@ -315,14 +315,8 @@ int main(int argc,char *argv[])
 		it++;
 	}
 	
-	if(rank == 0)
-	{
-		for(i = 1; i < size; i++)
-			MPI_Recv(world1+((N/size)*i*M), (N/size)*M, MPI_UNSIGNED, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-		print(world1);
-	}
-	else
-		MPI_Isend(world1+(l_r*M), (N/size)*M, MPI_UNSIGNED, 0, 0, MPI_COMM_WORLD, &request);
+	MPI_Gather(world1, (N/size)*M, MPI_UNSIGNED, world1, N*M, MPI_UNSIGNED, MPI_COMM_WORLD);
+	print(world1);
 
 	// ending
 	free(world1); free(world2);
