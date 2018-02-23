@@ -308,12 +308,12 @@ int main(int argc,char *argv[])
 		
 		printf("Process %d, iteration %d - work done, communicating\n", rank, it);
 		
-		MPI_Isend(world1+(l_r*M), M, MPI_UNSIGNED, (rank+1)%size, 0, MPI_COMM_WORLD, &request);
-		MPI_Isend(world1+(f_r*M), M, MPI_UNSIGNED, (rank-1)%size, 0, MPI_COMM_WORLD, &request);
+		MPI_Isend(world1+((l_r*M)*sizeof(unsigned int)), M, MPI_UNSIGNED, (rank+1)%size, 0, MPI_COMM_WORLD, &request);
+		MPI_Isend(world1+((f_r*M)*sizeof(unsigned int)), M, MPI_UNSIGNED, (rank-1)%size, 0, MPI_COMM_WORLD, &request);
 		printf("Process %d, iteration %d - data sent, waiting to receive\n", rank, it);
-		MPI_Recv(world1+(((l_r+1)%N)*M), M, MPI_UNSIGNED, (rank+1)%size, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		MPI_Recv(world1+(((l_r+1)%N)*M*sizeof(unsigned int)), M, MPI_UNSIGNED, (rank+1)%size, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 		printf("Process %d, iteration %d - first dataset received\n", rank, it);
-		MPI_Recv(world1+(((f_r-1)%N)*M), M, MPI_UNSIGNED, (rank-1)%size, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		MPI_Recv(world1+(((f_r-1)%N)*M*sizeof(unsigned int)), M, MPI_UNSIGNED, (rank-1)%size, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 		printf("Process %d, iteration %d - second dataset received\n", rank, it);
 		printf("Process %d, iteration %d - data received\n", rank, it);
 		MPI_Barrier(MPI_COMM_WORLD);
