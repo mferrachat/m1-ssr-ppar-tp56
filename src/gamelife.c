@@ -301,32 +301,36 @@ int main(int argc,char *argv[])
 	while (changes && it < itMax)
 	{
 		change = newgeneration(world1,world2,f_r,l_r);
-		worldaux = world1; world1 = world2; world2 = worldaux;
+		//worldaux = world1; world1 = world2; world2 = worldaux;
 		//print(world1);
 		
 		//MPI_Barrier(MPI_COMM_WORLD);
 		
-		MPI_Gather(world1+(l_r*M), (N/size)*M, MPI_UNSIGNED, world2, N*M, MPI_UNSIGNED, 0, MPI_COMM_WORLD);
-		if(rank == 0)
-			print(world2);
+		/* MPI_Gather(world1+(l_r*M), (N/size)*M, MPI_UNSIGNED, world2, N*M, MPI_UNSIGNED, 0, MPI_COMM_WORLD); */
 		
 		MPI_Allreduce(&change, &changes, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
 		
 		//printf("Thread %d, sends %x & %x to %d & %d.\n", rank, world1+(f_r*M), world1+((l_r-1)*M), (rank-1)%size, (rank+1)%size);
-		MPI_Isend(world1+(f_r*M), M, MPI_UNSIGNED, (rank-1)%size, 0, MPI_COMM_WORLD, &request);
-		MPI_Isend(world1+((l_r-1)*M), M, MPI_UNSIGNED, (rank+1)%size, 0, MPI_COMM_WORLD, &request);
+		/* MPI_Isend(world1+(f_r*M), M, MPI_UNSIGNED, (rank-1)%size, 0, MPI_COMM_WORLD, &request);
+		MPI_Isend(world1+((l_r-1)*M), M, MPI_UNSIGNED, (rank+1)%size, 0, MPI_COMM_WORLD, &request); */
 		
 		//printf("Thread %d, receives in %x & %x from %d & %d.\n", rank, world1+(((l_r)%N)*M), world1+(((f_r-1)%N)*M), (rank-1)%size, (rank+1)%size);
-		MPI_Recv(world1+(((f_r-1)%N)*M), M, MPI_UNSIGNED, (rank-1)%size, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-		MPI_Recv(world1+(((l_r)%N)*M), M, MPI_UNSIGNED, (rank+1)%size, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		/* MPI_Recv(world1+(((f_r-1)%N)*M), M, MPI_UNSIGNED, (rank-1)%size, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		MPI_Recv(world1+(((l_r)%N)*M), M, MPI_UNSIGNED, (rank+1)%size, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE); */
 		
-		MPI_Barrier(MPI_COMM_WORLD);
+		// MPI_Barrier(MPI_COMM_WORLD);
+		
+		MPI_Allgather(world2+(f_r*M), (N/size)*M, MPI_UNSIGNED, world1, (N/size)*M, MPI_UNSIGNED, MPI_COMM_WORLD);
+		
+		if(rank == 0)
+			print(world1);
+		
 		it++;
 	}
 	
-	MPI_Gather(world1+(l_r*M), (N/size)*M, MPI_UNSIGNED, world2, N*M, MPI_UNSIGNED, 0, MPI_COMM_WORLD);
+	//MPI_Gather(world1+(l_r*M), (N/size)*M, MPI_UNSIGNED, world2, N*M, MPI_UNSIGNED, 0, MPI_COMM_WORLD);
 	if(rank == 0)
-		print(world2);
+		print(world1);
 
 	// ending
 	//free(world1); free(world2);
