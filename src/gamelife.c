@@ -17,7 +17,7 @@
 #define WORLD_SIZE 32
 
 static int N = WORLD_SIZE;
-static int M = (WORLD_SIZE*2)/sizeof(unsigned int);
+static int M = WORLD_SIZE/(sizeof(unsigned int)*4);
 static int itMax = 20;
 typedef struct coord
 {
@@ -39,7 +39,7 @@ coord code(int x, int y, int dx, int dy)
 	int j = (y + dy)%N;
 	if (i < 0)  i = N + i;
 	if (j < 0)  j = N + j;
-	coord c = {i*M + (j >> (sizeof(unsigned int)/4)), j%(sizeof(unsigned int)/2)};
+	coord c = {i*M + (j >> (sizeof(unsigned int))), j%(sizeof(unsigned int)*4)};
 	return c;
 }
 
