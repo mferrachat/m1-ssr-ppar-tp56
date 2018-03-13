@@ -269,10 +269,10 @@ int main(int argc,char *argv[])
 	unsigned int *worldaux;
 
 	// getting started  
-	world1 = initialize_dummy();
+	//world1 = initialize_dummy();
 	//world1 = initialize_random();
 	//world1 = initialize_glider();
-	//world1 = initialize_small_exploder();
+	world1 = initialize_small_exploder();
 	world2 = allocate();
 	print(world1);
 
